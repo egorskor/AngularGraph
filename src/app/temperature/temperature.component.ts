@@ -1,76 +1,97 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {TemperatureService} from "../temperature.service";
 import {Chart} from 'chart.js';
+import {DataService} from "../data.service";
+import {GraphService} from "../graph.service";
+import {Subscription} from "rxjs/Subscription";
 
 @Component({
   selector: 'app-temperature',
   templateUrl: './temperature.component.html',
   styleUrls: ['./temperature.component.css']
 })
-export class TemperatureComponent implements OnInit {
+export class TemperatureComponent implements OnInit, OnDestroy {
 
   @Input() title: string;
 
   chart = [];
 
-  constructor(private temperatureService: TemperatureService) { }
+  private subscription: Subscription;
 
-  ngOnInit() {
-    this.temperatureService.getTemperature().subscribe(
-      res => {
-        let dateArray = [];
-        let valueArray = [];
-        // console.log(res);
-
-        for (let i = 0; i < res['length']; i++) {
-          //console.log(res[i]);
-          if (new Date(res[i]['t']) > new Date("1880-12-30") && new Date(res[i]['t']) < new Date("1882-01-01")) {
-            /*this.temperatureArray.push({
-              date: res[i]['t'],
-              value: res[i]['v']
-            });*/
-            dateArray.push(res[i]['t']);
-            valueArray.push(res[i]['v'])
-          }
-          else {
-            break;
-          }
-        }
-        // console.log(dateArray);
-        // console.log(valueArray);
-        this.chart = new Chart('canvas', {
-          type: 'line',
-          data: {
-            labels: dateArray,
-            datasets: [
-              {
-                data: valueArray,
-                borderColor: "#3cba9f",
-                fill: false
-              }
-            ]
-          },
-          options: {
-            legend: {
-              display: false
-            },
-            scales: {
-              xAxes: [{
-                display: true,
-              }],
-              yAxes: [{
-                display: true,
-                scaleLabel: {
-                  display: true,
-                  labelString: 'temperature'
-                }
-              }],
-            }
-          }
-        });
-
-      }
-    )
+  constructor(private dataService: DataService, private graphService: GraphService) {
   }
 
+  ngOnInit() {
+
+    // let data = this.dataService.getFilteredTemperature();
+
+    this.subscription = this.graphService.filterChangeStream.subscribe((val) => {
+      this.reloadGraph(val);
+    });
+
+  }
+
+  async reloadGraph(val) {
+    // this.chart.destroy();
+    // this.chart.clear();
+    this.chart = null;
+    window.document.getElementById('canvas').remove(); // this is my <canvas> element
+    let node = document.createElement('canvas');
+    node.id = "canvas";
+    window.document.getElementById('#graph-container').appendChild(node);
+    let datesArray = await this.dataService.getDates();
+    let temperatureValues = this.dataService.getTemperature();
+    let ret1 = [];
+    let ret2 = [];
+    for (let i = 0; i < datesArray.length; i++) {
+      if (new Date(datesArray[i]) >= new Date(val['fromDate'])
+        && new Date(datesArray[i]) <= new Date(val['toDate'])) {
+        ret1.push(datesArray[i]);
+        ret2.push(temperatureValues[i]);
+      }
+    }
+
+
+    console.log(ret1);
+    console.log(ret2);
+    this.chart = new Chart('canvas', {
+      type: 'line',
+      data: {
+        labels: ret1,
+        datasets: [
+          {
+            data: ret2,
+            borderColor: "#3cba9f",
+            fill: false
+          }
+        ]
+      },
+      options: {
+        legend: {
+          display: false
+        },
+        scales: {
+          xAxes: [{
+            display: true
+          }],
+          yAxes: [{
+            display: true,
+            scaleLabel: {
+              display: true,
+              labelString: 'Temperature'
+            }
+          }],
+        }
+      }
+    });
+  }
+
+  ngOnDestroy(){
+    console.log("temperatureComponentDestroyed");
+    if (this.subscription != null){
+      this.subscription.unsubscribe();
+    }
+  }
 }
+
+

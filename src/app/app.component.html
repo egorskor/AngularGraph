@@ -7,15 +7,15 @@
 <div class="content">
   <ul class="links">
     <li>
-      <a routerLink="/temperature" class="link">Temperature</a>
+      <a routerLink="/temperature!" (click)="onSelect('temperature')" class="link">Temperature</a>
     </li>
     <li>
-      <a routerLink="/precipitation" class="link">Precipitation</a>
+      <a routerLink="/precipitation!" (click)="onSelect('precipitation')" class="link">Precipitation</a>
     </li>
   </ul>
   <div class="graph">
     <div>
-
+      <app-filter [graphName]="selectedGraph"></app-filter>
     </div>
     <router-outlet ></router-outlet>
   </div>

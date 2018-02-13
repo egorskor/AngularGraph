@@ -8,7 +8,9 @@ import { Component } from '@angular/core';
 export class AppComponent {
   title = 'Архив метеослужбы';
 
-  fromDate: Date;
-  toDate: Date;
+  selectedGraph: string = 'precipitation';
 
+  onSelect(graphName: string){
+    this.selectedGraph = graphName;
+  }
 }

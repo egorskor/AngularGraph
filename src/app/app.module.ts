@@ -10,6 +10,10 @@ import {TemperatureService} from "./temperature.service";
 import {HttpClientModule} from "@angular/common/http";
 import { PrecipitationService } from './precipitation.service';
 import { FilterComponent } from './filter/filter.component';
+import {DataService} from "./data.service";
+import {FormsModule} from "@angular/forms";
+import {FilterService} from "./filter.service";
+import {GraphService} from "./graph.service";
 
 
 @NgModule({
@@ -22,9 +26,10 @@ import { FilterComponent } from './filter/filter.component';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule
+    HttpClientModule,
+    FormsModule
   ],
-  providers: [TemperatureService, PrecipitationService],
+  providers: [TemperatureService, PrecipitationService, DataService, FilterService, GraphService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
