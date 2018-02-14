@@ -1,6 +1,5 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {DataService} from "../data.service";
-import {ActivatedRoute} from "@angular/router";
 import {Router} from '@angular/router';
 import {FilterService} from "../filter.service";
 import {GraphService} from "../graph.service";
@@ -12,76 +11,37 @@ import {GraphService} from "../graph.service";
 })
 export class FilterComponent implements OnInit {
 
-  @Input() graphName: string;
-  dates: Date[] = [];
-  // toDate: Date[] = [];
-  fromDate: Date;
-  toDate: Date;
+  dates:Set<number> = new Set();
+  fromDate: number;
+  toDate: number;
 
   constructor(private dataService: DataService, private router: Router, private filterService: FilterService, private graphService: GraphService) {
   }
 
   onFromDateSelect() {
     this.filterService.fromDate = this.fromDate;
-    /*let url = "/" + this.graphName + "!" + "fromDate" + this.fromDate + ";" + "toDate" + this.toDate;
-    console.log(url);
-    this.router.navigateByUrl(url);
-    console.log(this.toDate);*/
     this.graphService.changeFilter({
-      "fromDate": this.fromDate,
-      "toDate": this.toDate
+      "fromDate": new Date (this.fromDate, 0, 1),
+      "toDate": new Date(this.toDate, 11, 31)
     });
   }
 
   onToDateSelect() {
     this.filterService.toDate = this.toDate;
     this.graphService.changeFilter({
-      "fromDate": this.fromDate,
-      "toDate": this.toDate
+      "fromDate": new Date (this.fromDate, 0, 1),
+      "toDate": new Date(this.toDate, 11, 31)
     });
   }
 
   async ngOnInit() {
-    /*await this.dataService.loadTemperature();*//*.subscribe(
-      res => {
-        for (let i = 0; i < res['length']; i++) {
-          if (new Date(res[i]['t']) > new Date("1880-12-30") && new Date(res[i]['t']) < new Date("1882-01-01")) {//TODO: remoce
-            this.dates.push(res[i]['t']);
-            // this.toDate.push(res[i]['t']);
-          }
-        }
-        this.fromDate = this.dates[0];
-        this.toDate = this.dates[this.dates.length - 1];
-      }
-    );*/
-    this.dataService.loadPrecipitation();
-    console.log("start fills searchs with" + this.dataService.getDates());
-    this.dates = await this.dataService.getDates();
+    //this.dataService.loadPrecipitation();//TODO? UNCOMMENT ME IF IT WAS EFFECTIVE
+    let tmp = await this.dataService.getDates();
+    this.dates = new Set (tmp.map(function(date) {
+      return new Date(date).getFullYear();
+    }));
+    this.fromDate = this.dates.values().next().value;
+    this.toDate = Array.from(this.dates).pop();
   }
 
-  fulfillDropDowns(res){
-    for (let i = 0; i < res['length']; i++) {
-      console.log(res[i]['t']);
-      if (new Date(res[i]['t']) > new Date("1880-12-30") && new Date(res[i]['t']) < new Date("1882-01-01")) {//TODO: remoce
-        this.dates.push(res[i]['t']);
-        // this.toDate.push(res[i]['t']);
-      }
-    }
-    this.fromDate = this.dates[0];
-    this.toDate = this.dates[this.dates.length - 1];
-    console.log("searchs filled with " + this.dates.length);
-  }
-
-
-  updateFromDate(date: Date) {
-    this.fromDate = date;
-    console.log(date);
-    window['fromDateFilter'] = date;
-  }
-
-  updateToDate(date: Date) {
-    this.toDate = date;
-    console.log(date);
-    window['toDateFilter'] = date;
-  }
 }

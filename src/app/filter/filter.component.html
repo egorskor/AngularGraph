@@ -1,14 +1,10 @@
 <label>From:</label>
-<select (change)="onFromDateSelect()" [(ngModel)]="fromDate">
+<select class="filters" (change)="onFromDateSelect()" [(ngModel)]="fromDate">
   <option *ngFor="let date of dates" >
     {{date}}
   </option>
 </select>
 <label>To:</label>
-<select (change)="onToDateSelect()" [(ngModel)]="toDate">
+<select class="filters" (change)="onToDateSelect()" [(ngModel)]="toDate">
   <option *ngFor="let date of dates">{{date}}</option>
 </select>
-<label>{{graphName}}</label>
-<label>{{fromDate}}</label>
-<label>{{toDate}}</label>
-<!--routerLink="/{{graphName}}/fromDate={{fromDate}};toDate={{toDate}}-->

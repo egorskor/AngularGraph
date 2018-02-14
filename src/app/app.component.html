@@ -1,21 +1,21 @@
 <!--The content below is only a placeholder and can be replaced.-->
 <div style="text-align:center">
   <h1>
-    {{ title }}!
+    {{ title }}
   </h1>
 </div>
 <div class="content">
   <ul class="links">
     <li>
-      <a routerLink="/temperature!" (click)="onSelect('temperature')" class="link">Temperature</a>
+      <a routerLink="/temperature!"  class="link">Temperature</a>
     </li>
     <li>
-      <a routerLink="/precipitation!" (click)="onSelect('precipitation')" class="link">Precipitation</a>
+      <a routerLink="/precipitation!" class="link">Precipitation</a>
     </li>
   </ul>
   <div class="graph">
     <div>
-      <app-filter [graphName]="selectedGraph"></app-filter>
+      <app-filter></app-filter>
     </div>
     <router-outlet ></router-outlet>
   </div>

@@ -1,5 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {TemperatureService} from "../temperature.service";
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Chart} from 'chart.js';
 import {DataService} from "../data.service";
 import {GraphService} from "../graph.service";
@@ -12,8 +11,6 @@ import {Subscription} from "rxjs/Subscription";
 })
 export class TemperatureComponent implements OnInit, OnDestroy {
 
-  @Input() title: string;
-
   chart = [];
 
   private subscription: Subscription;
@@ -22,38 +19,35 @@ export class TemperatureComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-
-    // let data = this.dataService.getFilteredTemperature();
-
     this.subscription = this.graphService.filterChangeStream.subscribe((val) => {
       this.reloadGraph(val);
     });
-
   }
 
-  async reloadGraph(val) {
-    // this.chart.destroy();
-    // this.chart.clear();
-    this.chart = null;
+  //So sad but bug still is not resolved
+  // https://stackoverflow.com/questions/24815851/how-to-clear-a-chart-from-a-canvas-so-that-hover-events-cannot-be-triggered
+  chartJSHack(){
     window.document.getElementById('canvas').remove(); // this is my <canvas> element
     let node = document.createElement('canvas');
     node.id = "canvas";
-    window.document.getElementById('#graph-container').appendChild(node);
+    window.document.getElementById('graph-container').appendChild(node);
+  }
+
+  async reloadGraph(val) {
+    this.chartJSHack();
     let datesArray = await this.dataService.getDates();
-    let temperatureValues = this.dataService.getTemperature();
+    let temperatureValues = await this.dataService.getTemperature();
     let ret1 = [];
     let ret2 = [];
     for (let i = 0; i < datesArray.length; i++) {
-      if (new Date(datesArray[i]) >= new Date(val['fromDate'])
-        && new Date(datesArray[i]) <= new Date(val['toDate'])) {
+
+      if (new Date(datesArray[i]) >= val['fromDate']
+        && new Date(datesArray[i]) <= val['toDate']) {
         ret1.push(datesArray[i]);
         ret2.push(temperatureValues[i]);
       }
     }
 
-
-    console.log(ret1);
-    console.log(ret2);
     this.chart = new Chart('canvas', {
       type: 'line',
       data: {
@@ -61,12 +55,13 @@ export class TemperatureComponent implements OnInit, OnDestroy {
         datasets: [
           {
             data: ret2,
-            borderColor: "#3cba9f",
+            borderColor: "#607D8B",
             fill: false
           }
         ]
       },
       options: {
+        animation: false,
         legend: {
           display: false
         },
@@ -87,7 +82,6 @@ export class TemperatureComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(){
-    console.log("temperatureComponentDestroyed");
     if (this.subscription != null){
       this.subscription.unsubscribe();
     }

@@ -4,7 +4,7 @@
 
 .links{
   width: 10%;
-  /*display: flex;*/
+  list-style-type: none;
 }
 
 .link {
